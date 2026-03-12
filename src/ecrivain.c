@@ -12,10 +12,11 @@ int main()
 
     if (fd == -1)
     {
-        perror("Erreur: Le pipe n'existe pas encore!");
+        perror("Erreur: Le pipe de communication n'existe pas encore!");
         return 1;
     }
 
+    printf("Entrez un message à envoyer au lecteur : ");
     fgets(message_utilisateur, sizeof(message_utilisateur), stdin);
     write(fd, message_utilisateur, sizeof(message_utilisateur));
 
