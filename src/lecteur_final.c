@@ -13,7 +13,6 @@ int main()
 
     fd2 = open(pipe_relais, O_RDONLY);
 
-    printf("En attente du message relayé.\n");
     read(fd2, message_final, sizeof(message_final));
     printf("Le lecteur final a recu: %s\n", message_final);
 

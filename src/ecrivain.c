@@ -4,12 +4,10 @@
 
 int main()
 {
-    int fd;
     char message_utilisateur[256];
     char *pipe_communication = "/tmp/pipe_communication";
 
-    fd = open(pipe_communication, O_WRONLY);
-
+    int fd = open(pipe_communication, O_WRONLY);
     if (fd == -1)
     {
         perror("Erreur: Le pipe de communication n'existe pas encore!");

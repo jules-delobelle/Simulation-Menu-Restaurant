@@ -5,8 +5,6 @@
 
 int main()
 {
-    int fd;
-    int fd2;
     char message_relais[256];
     char *pipe_relais = "/tmp/pipe_relais";
 
@@ -14,8 +12,8 @@ int main()
 
     mkfifo(pipe_communication, 0666);
 
-    fd = open(pipe_communication, O_RDONLY);
-    fd2 = open(pipe_relais, O_WRONLY);
+    int fd = open(pipe_communication, O_RDONLY);
+    int fd2 = open(pipe_relais, O_WRONLY);
     if (fd2 == -1)
     {
         perror("Erreur: Le pipe relais n'existe pas encore!");
