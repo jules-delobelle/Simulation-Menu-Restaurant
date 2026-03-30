@@ -1,0 +1,30 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -g
+SRC_COM = fonctions_communication.c
+OBJ_COM = fonctions_communication.o
+
+TARGETS = test_client test_lecteur_relais test_lecteur_final
+
+all: $(TARGETS)
+
+$(OBJ_COM): $(SRC_COM) fonctions_communication.h
+	$(CC) $(CFLAGS) -c $(SRC_COM) -o $(OBJ_COM)
+
+test_client: test_client.c $(OBJ_COM)
+	$(CC) $(CFLAGS) test_client.c $(OBJ_COM) -o test_client
+
+test_lecteur_relais: test_lecteur_relais.c $(OBJ_COM)
+	$(CC) $(CFLAGS) test_lecteur_relais.c $(OBJ_COM) -o test_lecteur_relais
+
+test_lecteur_final: test_lecteur_final.c $(OBJ_COM)
+	$(CC) $(CFLAGS) test_lecteur_final.c $(OBJ_COM) -o test_lecteur_final
+
+clean:
+	rm -f $(OBJ_COM) $(TARGETS)
+
+cleanall: clean
+	rm -f /tmp/client_*.fifo /tmp/relais_*.fifo \
+		/tmp/id_for_client_lecteur_com.fifo \
+		/tmp/id_for_relais_lecteur_final_com.fifo
+
+.PHONY: all clean cleanall
