@@ -1,7 +1,11 @@
-$dir = wsl wslpath -u ($PSScriptRoot -replace '\\', '/')
+$dir = (wsl wslpath -u ($PSScriptRoot -replace '\\', '//')).Trim()
 
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$host.UI.RawUI.WindowTitle = 'Lecteur Final' ; wsl.exe bash -c 'cd $dir ; ./test_lecteur_final ; read'"
+$cmd1 = "wsl.exe bash -c 'cd " + $dir + " && ./test_lecteur_final ; read'"
+$cmd2 = "wsl.exe bash -c 'cd " + $dir + " && ./test_lecteur_relais ; read'"
+$cmd3 = "wsl.exe bash -c 'cd " + $dir + " && ./test_client ; read'"
+
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$host.UI.RawUI.WindowTitle = 'Lecteur Final' ; $cmd1"
 Start-Sleep -Milliseconds 500
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$host.UI.RawUI.WindowTitle = 'Relais' ; wsl.exe bash -c 'cd $dir ; ./test_lecteur_relais ; read'"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$host.UI.RawUI.WindowTitle = 'Relais' ; $cmd2"
 Start-Sleep -Milliseconds 500
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$host.UI.RawUI.WindowTitle = 'Client' ; wsl.exe bash -c 'cd $dir ; ./test_client ; read'"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$host.UI.RawUI.WindowTitle = 'Client' ; $cmd3"
