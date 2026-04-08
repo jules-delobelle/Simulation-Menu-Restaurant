@@ -25,6 +25,11 @@ int main()
     }
     printf("Entrez un message à envoyer au lecteur : \n");
     fgets(message_client, sizeof(message_client), stdin);
+    message_client[strcspn(message_client, "\n")] = '\0';
+    if(!valider_format_requete(message_client)){
+        close(fd_client);
+        return 1;
+    }
     write(fd_client, message_client, sizeof(message_client));
     close(fd_client);
     printf("Écrivain : Message envoyé.\n\n");

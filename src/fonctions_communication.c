@@ -33,3 +33,18 @@ void rejoindre_pipe(LienCommunication *Lien, const char *source, const char *han
     snprintf(Lien->pipe_request, 256, "/tmp/%s_%d_req.fifo", source, Lien->id_pipe);
     snprintf(Lien->pipe_response, 256, "/tmp/%s_%d_res.fifo", source, Lien->id_pipe);
 }
+
+int parser_requete(const char *requete_str, RequeteQR *requete) {
+    return sscanf(requete_str, "|%d|%d|%d|", &requete->code_serveur, &requete->code_lieu, &requete->code_menu); 
+}
+
+int valider_format_requete(const char *requete_str){
+    RequeteQR requete;
+    int pars = parser_requete(requete_str, &requete);
+    if(pars != 3){
+        fprintf(stderr, "Erreur : format invalide\n");
+        return 0;
+    }
+    return 1;
+
+}
