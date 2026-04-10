@@ -24,7 +24,7 @@ clean:
 
 cleanall: clean
 	rm -f /tmp/client_*.fifo /tmp/relais_*.fifo \
-		/tmp/id_for_client_lecteur_com.fifo \
-		/tmp/id_for_relais_lecteur_final_com.fifo
+		/tmp/from_relais_to_client \
+		/tmp/from_lecteur_final_to_relais
 
 .PHONY: all clean cleanall

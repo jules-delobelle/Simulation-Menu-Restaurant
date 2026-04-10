@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #ifndef FONCTIONS_COMMUNICATION_H
 #define FONCTIONS_COMMUNICATION_H
+
+#include <time.h>
+#include <string.h>
 
 typedef struct
 {
@@ -14,10 +11,18 @@ typedef struct
     char pipe_response[256];
 } LienCommunication;
 
-void initialiser_pipe(LienCommunication *Lien, const char *communication_source);
+/* Côté serveur : crée les FIFOs et publie l'ID */
+void initialiser_pipe(LienCommunication *Lien, const char *nom_canal);
+void publier_id_pipe(LienCommunication *Lien, const char *source, const char *target);
 
-void publier_id_pipe(LienCommunication *Lien, const char *handshake_path);
+/* Côté client : récupère l'ID et se connecte */
+void rejoindre_pipe(LienCommunication *Lien, const char *source, const char *target);
+void connection(LienCommunication *Lien, const char *source, const char *target);
 
-void rejoindre_pipe(LienCommunication *Lien, const char *source, const char *handshake_path);
+/* Envoi / réception */
+void lecture_pipe(LienCommunication *Lien, char *message_recu);
+void lecture_confirmation(LienCommunication *Lien, char *confirmation);
+void ecriture_pipe(LienCommunication *Lien, char *message);
+void ecriture_textuelle_pipe(LienCommunication *Lien, char *message);
 
 #endif

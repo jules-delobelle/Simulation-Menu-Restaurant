@@ -1,42 +1,22 @@
 #include <stdio.h>
-#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 #include "fonctions_communication.h"
 
 int main()
 {
-    // initialisation lien pipe et buffer des messages
-    LienCommunication com_vers_lecteur;
-    char message_client[256];
+    LienCommunication com_vers_relais;
+    char message[256];
     char confirmation[256];
 
-    // jointure pipe client -> lecteur
-    printf("En attente de connexion avec le lecteur...\n\n");
-    rejoindre_pipe(&com_vers_lecteur, "client", "/tmp/id_for_client_lecteur_com.fifo");
-    printf("Connection effectuée avec le lecteur sur le pipe %d\n\n", com_vers_lecteur.id_pipe);
+    /* Attend que le relais publie son ID puis se connecte */
+    connection(&com_vers_relais, "client", "relais");
 
-    // ouverture pipe client -> lecteur
-    int fd_client = open(com_vers_lecteur.pipe_request, O_WRONLY);
-    if (fd_client == -1)
-    {
-        perror("Erreur: Le pipe de communication n'existe pas encore!\n\n");
-        return 1;
-    }
-    printf("Entrez un message à envoyer au lecteur : \n");
-    fgets(message_client, sizeof(message_client), stdin);
-    write(fd_client, message_client, sizeof(message_client));
-    close(fd_client);
-    printf("Écrivain : Message envoyé.\n\n");
+    /* Saisit et envoie le message */
+    ecriture_textuelle_pipe(&com_vers_relais, message);
 
-    // ouverture du pipe de confirmation de reception du lecteur
-    int fd_return = open(com_vers_lecteur.pipe_response, O_RDONLY);
-    if (fd_return != -1)
-    {
-        read(fd_return, confirmation, sizeof(confirmation));
-        printf("Confirmation: %s.\n\n", confirmation);
-        close(fd_return);
-    }
+    /* Attend la confirmation */
+    lecture_confirmation(&com_vers_relais, confirmation);
 
     return 0;
 }
