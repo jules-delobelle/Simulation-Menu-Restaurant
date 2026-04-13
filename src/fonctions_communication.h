@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -12,10 +14,20 @@ typedef struct
     char pipe_response[256];
 } LienCommunication;
 
+typedef struct {
+    int code_serveur;
+    int code_lieu;
+    int code_menu;
+} RequeteQR;
+
 void initialiser_pipe(LienCommunication *Lien, const char *communication_source);
 
 void publier_id_pipe(LienCommunication *Lien, const char *handshake_path);
 
 void rejoindre_pipe(LienCommunication *Lien, const char *source, const char *handshake_path);
+
+int parser_requete(const char *requete_str, RequeteQR *requete);
+
+int valider_format_requete(const char *requete_str);
 
 #endif
