@@ -5,12 +5,12 @@
 
 void *routine_dataserveur(void *arg)
 {
-    (void)arg;
+    char *fichier = (char *)arg;
     LienCommunication com_vers_routeur;
 
     /* Crée les FIFOs et publie l'ID au routeur une seule fois */
-    initialiser_pipe(&com_vers_routeur, "dataserveur");
-    publier_id_pipe(&com_vers_routeur, "dataserveur", "routeur");
+    initialiser_pipe(&com_vers_routeur, fichier);
+    publier_id_pipe(&com_vers_routeur, fichier, "routeur");
 
     while (1)
     {
@@ -25,15 +25,19 @@ void *routine_dataserveur(void *arg)
         if (parser_requete(message_recu, &requete) != 3)
         {
             fprintf(stderr, "Erreur : contenu mal parsé\n");
-            continue;
+            snprintf(menu_trouve, BUFFER_LENGTH, "NON");
         }
-
-        /* Charge le menu */
-        if (!charger_menu(&requete, menu_trouve))
-            snprintf(menu_trouve, BUFFER_LENGTH, "Erreur : menu introuvable");
-
-        printf("Menu trouvé : %s\n", menu_trouve);
-        fflush(stdout);
+        else
+        {
+            /* Charge le menu depuis le fichier de ce dataserveur */
+            if (!charger_menu(&requete, menu_trouve, fichier))
+                snprintf(menu_trouve, BUFFER_LENGTH, "NON");
+            else
+            {
+                printf("Menu trouvé dans %s : %s\n", fichier, menu_trouve);
+                fflush(stdout);
+            }
+        }
 
         /* Renvoie le résultat au routeur */
         int fd = open(com_vers_routeur.pipe_response, O_WRONLY);

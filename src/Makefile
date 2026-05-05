@@ -3,28 +3,29 @@ CFLAGS = -Wall -Wextra -g
 SRC_COM = fonctions_communication.c
 OBJ_COM = fonctions_communication.o
 
-TARGETS = client lecteur_relais lecteur_final
+TARGETS = client routeur dataserveur
 
 all: $(TARGETS)
 
 $(OBJ_COM): $(SRC_COM) fonctions_communication.h
 	$(CC) $(CFLAGS) -c $(SRC_COM) -o $(OBJ_COM)
 
-client: client.c $(OBJ_COM)
-	$(CC) $(CFLAGS) client.c $(OBJ_COM) -o client
+client: main.c client.c $(OBJ_COM)
+	$(CC) $(CFLAGS) -DCLIENT main.c client.c $(OBJ_COM) -o client -lpthread
 
-lecteur_relais: lecteur_relais.c $(OBJ_COM)
-	$(CC) $(CFLAGS) lecteur_relais.c $(OBJ_COM) -o lecteur_relais
+routeur: main.c routeur.c $(OBJ_COM)
+	$(CC) $(CFLAGS) -DROUTEUR main.c routeur.c $(OBJ_COM) -o routeur -lpthread -lrt
 
-lecteur_final: lecteur_final.c $(OBJ_COM)
-	$(CC) $(CFLAGS) lecteur_final.c $(OBJ_COM) -o lecteur_final
+dataserveur: main.c dataserveur.c $(OBJ_COM)
+	$(CC) $(CFLAGS) -DDATASERVEUR main.c dataserveur.c $(OBJ_COM) -o dataserveur -lpthread
 
 clean:
 	rm -f $(OBJ_COM) $(TARGETS)
 
 cleanall: clean
-	rm -f /tmp/client_*.fifo /tmp/relais_*.fifo \
-		/tmp/from_relais_to_client \
-		/tmp/from_lecteur_final_to_relais
+	rm -f /tmp/dataserveur_*.fifo /tmp/routeur_*.fifo \
+		/tmp/from_routeur_to_client \
+		/tmp/from_dataserveur_to_routeur
+	sem_unlink /verrou_routeur 2>/dev/null || true
 
 .PHONY: all clean cleanall

@@ -3,20 +3,30 @@
 #include <unistd.h>
 #include "fonctions_communication.h"
 
-int main()
+void *routine_client(void *arg)
 {
-    LienCommunication com_vers_relais;
+    LienCommunication com_vers_routeur;
     char message[256];
     char confirmation[256];
 
-    /* Attend que le relais publie son ID puis se connecte */
-    connection(&com_vers_relais, "client", "relais");
+    /* Attend que le routeur publie son ID puis se connecte */
+    connection(&com_vers_routeur, "client", "routeur");
 
-    /* Saisit et envoie le message */
-    ecriture_textuelle_pipe(&com_vers_relais, message);
+    if (arg != NULL)
+    {
+        strncpy(message, (char *)arg, 255);
+        printf("Envoi de la commande : %s\n", message);
+        fflush(stdout);
+        ecriture_pipe(&com_vers_routeur, message);
+    }
+    else
+    {
+        /* saisie clavier */
+        ecriture_textuelle_pipe(&com_vers_routeur, message);
+    }
 
-    /* Attend la confirmation */
-    lecture_confirmation(&com_vers_relais, confirmation);
+    /* Attend la réponse */
+    lecture_confirmation(&com_vers_routeur, confirmation);
 
-    return 0;
+    return NULL;
 }

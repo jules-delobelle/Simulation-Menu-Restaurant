@@ -12,27 +12,33 @@ void *routine_routeur(void *arg)
     (void)arg;
     sem = sem_open("/verrou_routeur", O_CREAT, 0666, 1);
 
-    /* connexion au dataserveur une seule fois */
-    LienCommunication com_vers_dataserveur;
-    connection(&com_vers_dataserveur, "routeur", "dataserveur");
+    /* connexion aux 3 dataserveurs une seule fois avant la boucle */
+    LienCommunication com_dataserveur[3];
+    connection(&com_dataserveur[0], "routeur", "menus_lieu1.txt");
+    connection(&com_dataserveur[1], "routeur", "menus_lieu2.txt");
+    connection(&com_dataserveur[2], "routeur", "menus_lieu3.txt");
 
     while (1)
     {
         char message_recu[256];
         char confirmation[256];
+        char menu_final[256];
         LienCommunication com_vers_client;
 
-        char handshake[256];
-        snprintf(handshake, 256, "/tmp/from_routeur_to_client");
-        unlink(handshake);
+        /* Attend que le client précédent ait consommé le handshake */
+        while (access("/tmp/from_routeur_to_client", F_OK) == 0)
+            usleep(5000);
 
         initialiser_pipe(&com_vers_client, "routeur");
         publier_id_pipe(&com_vers_client, "routeur", "client");
 
+        /* Prend le verrou */
         sem_wait(sem);
 
+        /* Reçoit la commande du client */
         lecture_pipe(&com_vers_client, message_recu);
 
+        /* Valide le format */
         if (!valider_format_requete(message_recu))
         {
             int fd_err = open(com_vers_client.pipe_response, O_WRONLY);
@@ -46,9 +52,20 @@ void *routine_routeur(void *arg)
             continue;
         }
 
-        ecriture_pipe(&com_vers_dataserveur, message_recu);
-        lecture_confirmation(&com_vers_dataserveur, confirmation);
+        /* Interroge les dataserveurs un par un */
+        snprintf(menu_final, 256, "Erreur : aucun menu correspondant");
+        for (int i = 0; i < 3; i++)
+        {
+            ecriture_pipe(&com_dataserveur[i], message_recu);
+            lecture_confirmation(&com_dataserveur[i], confirmation);
+            if (strcmp(confirmation, "NON") != 0)
+            {
+                strncpy(menu_final, confirmation, 255);
+                break;
+            }
+        }
 
+        /* Renvoie le résultat au client */
         int fd = open(com_vers_client.pipe_response, O_WRONLY);
         if (fd == -1)
         {
@@ -56,9 +73,10 @@ void *routine_routeur(void *arg)
             sem_post(sem);
             continue;
         }
-        write(fd, confirmation, strlen(confirmation) + 1);
+        write(fd, menu_final, strlen(menu_final) + 1);
         close(fd);
 
+        /* Libère le verrou */
         sem_post(sem);
     }
 
